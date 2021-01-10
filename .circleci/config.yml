@@ -1,6 +1,6 @@
 version: 2.1
 
-#### It's a good practice to keep your commands at the top of the config file. In this project, you'll need at least 2 commands:
+##### It's a good practice to keep your commands at the top of the config file. In this project, you'll need at least 2 commands:
 
 commands:
   revert-migration:
