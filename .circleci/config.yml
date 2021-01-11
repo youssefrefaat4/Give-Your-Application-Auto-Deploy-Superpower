@@ -73,7 +73,7 @@ jobs:
           command: |
              cd ~/project/frontend && npm i && npm run build
       - destroy-environment-linux:
-          bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+          bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       - persist_to_workspace:
           root: ./
@@ -103,7 +103,7 @@ jobs:
           command: |
              cd ~/project/backend && npm i && npm run build
       - destroy-environment-linux:
-          bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+          bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
       - persist_to_workspace:
           root: ./
@@ -122,7 +122,7 @@ jobs:
           command: |
               cd ~/project/frontend && npm test
       - destroy-environment-linux:
-          bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+          bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   test-backend:
@@ -137,7 +137,7 @@ jobs:
           command: |
               cd ~/project/backend && npm run test         
       - destroy-environment-linux:
-          bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+          bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
   
   scan-frontend:
@@ -176,21 +176,21 @@ jobs:
       - run:
           name: save ips
           command: | 
-              curl -H "Content-Type: text/plain" -H "token: 0cd52177-868d-4982-ac51-f1e6b661064a" --request PUT --data "$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name, Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --output=text)" https://api.memstash.io/values/ips        
+              curl -H "Content-Type: text/plain" -H "token: 0cd52177-868d-4982-ac51-f1e6b661064a" --request PUT --data "$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name, Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" --output=text)" https://api.memstash.io/values/ips        
       - run:
           name: create S3 bucket for frontend
           command: |
-               echo "{"Version": "2012-10-17","Statement": [{"Sid": "PublicReadGetObject","Effect": "Allow","Principal": "*","Action": "s3:GetObject","Resource": "arn:aws:s3:::frontend${CIRCLE_WORKFLOW_ID:0:7}/*"}]}" > ~/bucket_policy.json
+               echo "{"Version": "2012-10-17","Statement": [{"Sid": "PublicReadGetObject","Effect": "Allow","Principal": "*","Action": "s3:GetObject","Resource": "arn:aws:s3:::udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}/*"}]}" > ~/bucket_policy.json
                cat ~/bucket_policy.json
-               aws s3api create-bucket --bucket frontend${CIRCLE_WORKFLOW_ID:0:7} --region us-west-2  --create-bucket-configuration LocationConstraint=us-west-2
-               aws s3api put-bucket-policy --bucket frontend${CIRCLE_WORKFLOW_ID:0:7} --policy  "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Sid\": \"PublicReadGetObject\",\"Effect\": \"Allow\",\"Principal\": \"*\",\"Action\": \"s3:GetObject\",\"Resource\": \"arn:aws:s3:::frontend${CIRCLE_WORKFLOW_ID:0:7}/*\"}]}"
-               aws s3 website s3://frontend${CIRCLE_WORKFLOW_ID:0:7}/ --index-document index.html 
+               aws s3api create-bucket --bucket udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} --region us-west-2  --create-bucket-configuration LocationConstraint=us-west-2
+               aws s3api put-bucket-policy --bucket udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} --policy  "{\"Version\": \"2012-10-17\",\"Statement\": [{\"Sid\": \"PublicReadGetObject\",\"Effect\": \"Allow\",\"Principal\": \"*\",\"Action\": \"s3:GetObject\",\"Resource\": \"arn:aws:s3:::udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}/*\"}]}"
+               aws s3 website s3://udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}/ --index-document index.html 
       - run:
           name: save s3 arn bucket
           command: |
-              curl -H "Content-Type: text/plain" -H "token: 0cd52177-868d-4982-ac51-f1e6b661064a" --request PUT --data "arn:PARTITION:s3:::frontend${CIRCLE_WORKFLOW_ID:0:7}" https://api.memstash.io/values/s3bucket      
+              curl -H "Content-Type: text/plain" -H "token: 0cd52177-868d-4982-ac51-f1e6b661064a" --request PUT --data "arn:PARTITION:s3:::udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" https://api.memstash.io/values/s3bucket      
       - destroy-environment:
-          bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+          bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"           
 
   deploy-backend:
@@ -217,7 +217,7 @@ jobs:
                 curl -H "token: 0cd52177-868d-4982-ac51-f1e6b661064a" --request GET https://api.memstash.io/values/ips >> ~/inventory.txt && 
                 export ANSIBLE_HOST_KEY_CHECKING=False && ansible-playbook  -i ~/inventory.txt .circleci/ansible/roles/configure-server/playbook.yml
       - destroy-environment-linux:
-          bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+          bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
           cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   run-migrations:
@@ -231,7 +231,7 @@ jobs:
             name: migrate database
             command: cd ./backend/ && npm run migrations
         - destroy-environment-linux:
-            bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+            bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
             cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   deploy-backend-andmovecode:
@@ -263,7 +263,7 @@ jobs:
                 curl -H "token: 0cd52177-868d-4982-ac51-f1e6b661064a" --request GET https://api.memstash.io/values/ips >> ~/inventory.txt && 
                 export ANSIBLE_HOST_KEY_CHECKING=False && ansible-playbook  -i ~/inventory.txt .circleci/ansible/roles/deploy/playbook.yml
         - destroy-environment-linux:
-            bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+            bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
             cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
             
   deploy-frontend:  
@@ -280,7 +280,7 @@ jobs:
             name: deploy 
             command: cd ~/project/frontend && npm i && npm run build
         - destroy-environment-linux:
-            bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+            bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
             cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
         - persist_to_workspace:
            root: ./
@@ -303,9 +303,9 @@ jobs:
            command: ls ~/project/frontend/
        - run: 
            name: copy files to s3
-           command: aws s3 cp ~/project/frontend/dist s3://frontend${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
+           command: aws s3 cp ~/project/frontend/dist s3://udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
        - destroy-environment:
-           bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+           bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
            cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"    
   smoke-test-frontend:
     docker:
@@ -315,7 +315,7 @@ jobs:
        - run: 
            name: smoke test.
            command: |
-              URL="http://frontend${CIRCLE_WORKFLOW_ID:0:7}.s3.us-west-2.amazonaws.com/index.html#/employees"    
+              URL="http://udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}.s3.us-west-2.amazonaws.com/index.html#/employees"    
               URL="http://udapeople-kk1j287dhjppmz4373.s3-website-us-west-2.amazonaws.com/#/employees"
               if curl -s --head ${URL}
               then
@@ -324,7 +324,7 @@ jobs:
                return 1
               fi
        - destroy-environment:
-           bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+           bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
            cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   smoke-test-backend:
@@ -339,7 +339,7 @@ jobs:
                 curl "http://${BACKEND_IP}:3030/api/status"
 
        - destroy-environment:
-           bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+           bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
            cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   cloudfront-update:
@@ -359,7 +359,7 @@ jobs:
                aws cloudformation delete-stack --stack-name  udapeople-backend-${OLD_WORKFLOW_ID}
                aws cloudformation delete-stack --stack-name  udapeople-cloudfront-${OLD_WORKFLOW_ID}
        - destroy-environment:
-           bucket_name: "frontend${CIRCLE_WORKFLOW_ID:0:7}"
+           bucket_name: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
            cf_stack: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
   run-prohmetuos-exporter:
